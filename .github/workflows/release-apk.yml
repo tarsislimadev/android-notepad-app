@@ -42,9 +42,23 @@ jobs:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Resolve release version
+        id: release_version
+        shell: bash
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+          else
+            TAG_NAME="v${VERSION}"
+          fi
+          echo "tag_name=${TAG_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "release_name=Notepad ${TAG_NAME}" >> "${GITHUB_OUTPUT}"
+
       - name: Publish APK to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.release_version.outputs.tag_name }}
+          name: ${{ steps.release_version.outputs.release_name }}
           files: build/app/outputs/flutter-apk/app-release.apk
           generate_release_notes: true
