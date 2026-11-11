@@ -1,6 +1,6 @@
 # Android Notepad app
 
-Save your notes
+Write what you want
 
 ## license
 
